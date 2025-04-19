@@ -1,0 +1,4 @@
+__pycache__
+.env
+conversation_data
+.venv

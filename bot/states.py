@@ -1,0 +1,4 @@
+class STATE:
+    ALLOWED = "ALLOWED"
+    NOT_ALLOWED = "NOT_ALLOWED"
+    

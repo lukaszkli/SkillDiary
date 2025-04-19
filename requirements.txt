@@ -1,0 +1,6 @@
+python-telegram-bot
+tortoise-orm
+asyncpg
+dotenv
+pillow
+google-genai
