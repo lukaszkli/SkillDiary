@@ -20,7 +20,7 @@ This project was created as a learning exercise and a way to practice various te
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/SkillDiary.git
+    git clone https://github.com/lukaszkli/SkillDiary.git
     cd SkillDiary
     ```
 2.  **Create a virtual environment (recommended):**
