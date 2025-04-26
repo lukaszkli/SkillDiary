@@ -2,11 +2,16 @@ import telegram
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
-from core.skills_updater import skill_updater_message_handler
+from core.new_skills import skill_updater_message_handler
 
 import database as db
 
-async def skill_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def new_skill_message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """ Default handler for the messages in the conversation
+        User can send a message for example: "I learned Python and JavaScript"
+        and the bot will update the skills in the database based on the message.
+    """
+
     user_telegram_id = update.effective_user.id
     user = await db.User.get(telegram_id=user_telegram_id)
     user_message = update.message.text

@@ -18,7 +18,13 @@ class GeminiModel(Enum):
     GEMINI_1_5_FLASH = "gemini-1.5-flash"
     GEMINI_1_5_PRO = "gemini-1.5-pro"
 
-def get_response(system_prompt: str, user_prompt: str, model: GeminiModel, input_images: list[Image.Image] = None, output_schema: type = None) -> str:
+def get_response(system_prompt: str,
+                 user_prompt: str,
+                 model: GeminiModel,
+                 input_images: list[Image.Image] = None,
+                 output_schema: type = None,
+                 max_retires = 3) -> str:
+    
     api_key = os.getenv("GEMINI_API_KEY")
 
     client = genai.Client(api_key=api_key)
@@ -38,11 +44,21 @@ def get_response(system_prompt: str, user_prompt: str, model: GeminiModel, input
     if input_images:
         contents.extend(input_images)
     
-    response = client.models.generate_content(
-        model=model.value,
-        config=config,
-        contents=contents
-    )
+    retires = 0
+    while True:
+        try:
+            response = client.models.generate_content(
+                model=model.value,
+                config=config,
+                contents=contents
+            )
+            return response.text
+        except Exception as e:
+            print(f"Error: {e}, Retrying...")
+            retires += 1
+            if retires >= max_retires:
+                raise e
+            continue
 
-    return response.text
+    
     

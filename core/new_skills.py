@@ -7,27 +7,25 @@ from LLM.gemini import GeminiModel
 
 import database as db
 
-class SkillPoint(BaseModel):
-    skill_name: str
-    skill_description: str | None
-    points: int
 
-class SkillCategory(BaseModel):
-    category_name: str
-    category_description: str | None
-    skills: list[SkillPoint]
+from core.types import Skill, SkillCategory
+
 
 class SkillUpdate(BaseModel):
     updated_skills: list[SkillCategory] | None
 
 
 class SkillCategoryDemand(BaseModel):
+    """
+    Class to represent the skill categories requested by the LLM to fetch the skills.
+    """
     category_names: list[str]
 
 
 async def _get_skill_categories_demand(message: str) -> SkillCategoryDemand:
     """
-    Function to get the skill categories demand for a user.
+    LLM decides which skill categories are needed to update the skills based on the user message.
+    The function will return the list of skill categories.
     """
 
     system_prompt = ""
@@ -38,31 +36,18 @@ async def _get_skill_categories_demand(message: str) -> SkillCategoryDemand:
 
     user_prompt = f"Existing Categories:\n{str(existing_categories)}\n\nUser Message:\n{message}"
 
+    response = gemini.get_response(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        model=GeminiModel.GEMINI_2_0_FLASH,
+        output_schema=SkillCategoryDemand
+    )
 
-    max_retries = 3
-    retry_count = 0
-    while True:
-        try:
-            response = gemini.get_response(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                model=GeminiModel.GEMINI_2_0_FLASH,
-                output_schema=SkillCategoryDemand
-            )
-            print(response)
-            skill_category_demand = SkillCategoryDemand.model_validate_json(response)
-            return skill_category_demand
+    skill_category_demand = SkillCategoryDemand.model_validate_json(response)
+    return skill_category_demand
             
-        except Exception as e:
-            # TODO: Handle specific exceptions
-            # TODO: Add logging
-            print(f"Error: {e}, Retrying...")
-            retry_count += 1
-            if retry_count >= max_retries:
-                raise e
-            continue
 
-async def _save_skill_update(user_id: int, skill_update: SkillUpdate):
+async def _save_skill_to_db(user_id: int, skill_update: SkillUpdate):
     """
     Function to save the skill update for a user.
     """
@@ -115,23 +100,15 @@ async def skill_updater_message_handler(user_id: int, message: str) -> SkillUpda
 
     user_prompt = f"Skills:\n{str(skills)}\n\nUser Message:\n{message}"
 
-    max_retries = 3
-    retry_count = 0
-    while True:
-        try:
-            response = gemini.get_response(
-                system_prompt=system_prompt,
-                user_prompt=user_prompt,
-                model=GeminiModel.GEMINI_2_0_FLASH,
-                output_schema=SkillUpdate
-            )
-            print(response)
-            skill_update = SkillUpdate.model_validate_json(response)
-            await _save_skill_update(user_id, skill_update)
-            return skill_update
+
+    response = gemini.get_response(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        model=GeminiModel.GEMINI_2_0_FLASH,
+        output_schema=SkillUpdate
+    )
+    print(response)
+    skill_update = SkillUpdate.model_validate_json(response)
+    await _save_skill_to_db(user_id, skill_update)
+    return skill_update
             
-        except Exception as e:
-            retry_count += 1
-            if retry_count >= max_retries:
-                raise e
-            continue

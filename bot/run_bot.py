@@ -10,7 +10,8 @@ import database as db
 
 from bot.states import STATE
 import bot.conversation.start
-import bot.conversation.skill_messages
+import bot.conversation.new_skill
+import bot.conversation.skillset
 
 
 logging.basicConfig(
@@ -41,7 +42,9 @@ def bot_main():
         STATE.NOT_ALLOWED: [],
         STATE.ALLOWED: [
             CommandHandler("start", bot.conversation.start.start_command_handler),
-            MessageHandler(filters.TEXT & ~filters.COMMAND, bot.conversation.skill_messages.skill_message_handler),
+            CommandHandler("skillset", bot.conversation.skillset.skillset_command_handler),
+            CommandHandler("skillset_summary", bot.conversation.skillset.skillset_summary_command_handler),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, bot.conversation.new_skill.new_skill_message_handler),
         ],
     }
 
