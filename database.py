@@ -59,13 +59,11 @@ class Skill(Model):
     id = fields.IntField(pk=True)
     name = fields.CharField(max_length=255, unique=True)
     description = fields.TextField(null=True)
-
-    categories: fields.ManyToManyRelation[SkillCategory] = fields.ManyToManyField(
-        "models.SkillCategory", related_name="skills", through="skill_category_skills"
-    )
+    category = fields.ForeignKeyField("models.SkillCategory", related_name="skills", on_delete=fields.CASCADE)
 
     class Meta:
         table = "skills"
+
 
 
 class UserExperience(Model):

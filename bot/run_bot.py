@@ -10,6 +10,7 @@ import database as db
 
 from bot.states import STATE
 import bot.conversation.start
+import bot.conversation.skill_messages
 
 
 logging.basicConfig(
@@ -40,6 +41,7 @@ def bot_main():
         STATE.NOT_ALLOWED: [],
         STATE.ALLOWED: [
             CommandHandler("start", bot.conversation.start.start_command_handler),
+            MessageHandler(filters.TEXT & ~filters.COMMAND, bot.conversation.skill_messages.skill_message_handler),
         ],
     }
 
